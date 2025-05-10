@@ -3,7 +3,7 @@ module github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner
 go 1.24.0
 
 require (
-	github.com/cloudevents/sdk-go/v2 v2.15.2
+	github.com/cloudevents/sdk-go/v2 v2.16.0
 	github.com/eclipse-xfsc/cloud-event-provider v0.1.5
 	github.com/eclipse-xfsc/nats-message-library v1.1.13
 	github.com/eclipse-xfsc/oid4-vci-issuer-service v1.2.0
