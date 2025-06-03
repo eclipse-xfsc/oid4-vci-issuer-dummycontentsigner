@@ -88,7 +88,9 @@ func CredentialRequest(conf config.Config, storage IssuanceStorage) {
 			}
 
 			id := uuid.NewString()
+			log.Printf("Created ID: %v", id)
 			nonce := uuid.NewString()
+			log.Printf("Created nonce: %v", nonce)
 
 			offerReq := issumsg.OfferingURLReq{
 				Request: common.Request{
