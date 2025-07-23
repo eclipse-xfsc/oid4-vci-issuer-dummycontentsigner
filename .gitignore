@@ -1,1 +1,3 @@
 *.exe
+deployment/helm/charts
+deployment/helm/Chart.lock

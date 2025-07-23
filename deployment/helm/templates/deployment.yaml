@@ -35,6 +35,12 @@ spec:
         env:
           - name: "ORIGIN"
             value: {{ .Values.config.origin }}
+          - name: "CREDENTIAL_ISSUER"
+            value: {{ .Values.config.credential_issuer }}
+          - name: "AUTHORIZATION_SERVER"
+            value: "{{ join "," .Values.config.authorization_server }}"
+          - name: "CREDENTIAL_ENDPOINT"
+            value: {{ .Values.config.credential_endpoint }}
           - name: "SIGNERURL"
             value: {{ .Values.config.signerUrl }}
           - name: "SIGNERKEY"
@@ -44,7 +50,8 @@ spec:
           - name: "NATS_QUEUE_GROUP"
             value: {{ .Values.config.nats.queuegroup }}      
           - name: "NATS_REQUEST_TIMEOUT"
-            value: {{ .Values.config.nats.requestTimeOut }}                   
+            value: {{ .Values.config.nats.requestTimeOut }} 
+                
         ports:
         - name: http
           containerPort: {{ .Values.server.http.port }}
