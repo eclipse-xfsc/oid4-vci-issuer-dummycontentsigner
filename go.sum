@@ -32,8 +32,8 @@ github.com/eclipse-xfsc/crypto-provider-core v1.4.1 h1:qRPfErTz4b2ea4QnFuRBLHyVX
 github.com/eclipse-xfsc/crypto-provider-core v1.4.1/go.mod h1:dkIbKR46k3rwBY85gpgLbElrd/7/S78oKH8D/E1Rl+4=
 github.com/eclipse-xfsc/did-core v1.0.2 h1:UDqmuBqqaO07jSqW7RhjNkRpENDGJgJ0GderaKNO8kM=
 github.com/eclipse-xfsc/did-core v1.0.2/go.mod h1:pNjlLRKCRzyK7q4GtjnHeJKz74l6ooJt8nKPE86BGm0=
-github.com/eclipse-xfsc/nats-message-library v1.1.13 h1:512BiQ+w7OpzJShWZ/c73BXF/0S45J2iw9pyOCCiMvQ=
-github.com/eclipse-xfsc/nats-message-library v1.1.13/go.mod h1:BuyOjgbVrW+9fwh7EurE4LcdsrSjF6UHHiWHTOL0Ojs=
+github.com/eclipse-xfsc/nats-message-library v1.1.14 h1:r50RJwEQ6W8rjs500r3pCd6ZRaPITOnWgLESuHknmyw=
+github.com/eclipse-xfsc/nats-message-library v1.1.14/go.mod h1:BuyOjgbVrW+9fwh7EurE4LcdsrSjF6UHHiWHTOL0Ojs=
 github.com/eclipse-xfsc/oid4-vci-issuer-service v1.2.0 h1:h0GgTBMHBCpsUrR1c+IOXcmKgEZkFkzLdZYrYBzgar8=
 github.com/eclipse-xfsc/oid4-vci-issuer-service v1.2.0/go.mod h1:x/2RkeYmLresZmuQhIJtB1DEpk9L1v9ANUXSsvmr0zc=
 github.com/eclipse-xfsc/oid4-vci-vp-library v1.4.6 h1:7s9z5MMesQyCx4BgWPzG6CovBunLnBqmSKwDzTqa+6A=
