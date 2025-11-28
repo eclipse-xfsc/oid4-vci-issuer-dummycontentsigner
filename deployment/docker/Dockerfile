@@ -1,17 +1,29 @@
-FROM golang:1.24.2-alpine3.20 as build
+# --- Build Stage ---
+    FROM golang:1.24-alpine3.20 AS build
 
-WORKDIR /app
-
-ADD . .
-
-RUN CGO_ENABLED=0 GOOS=linux go build
-
-FROM alpine:3.15 as runner
-
-COPY --from=build /app/dummycontentsigner /opt/dummycontentsigner
-
-WORKDIR /opt
-
-EXPOSE 8080
-
-CMD ["./dummycontentsigner"]
+    WORKDIR /app
+    
+    # Nur go.mod | go.sum zuerst → besseres Caching
+    COPY go.mod go.sum ./
+    RUN go mod download
+    
+    # Danach den Rest
+    COPY . .
+    
+    # Statisches Linux-Binary bauen
+    RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o dummycontentsigner ./main.go
+    
+    # --- Runtime Stage ---
+    FROM alpine:3.20 AS runner
+    
+    WORKDIR /opt
+    
+    # Minimal notwendige Runtime-Pakete
+    RUN apk --no-cache add ca-certificates
+    
+    COPY --from=build /app/dummycontentsigner /opt/dummycontentsigner
+    
+    EXPOSE 8080
+    
+    CMD ["./dummycontentsigner"]
+    
