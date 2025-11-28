@@ -59,6 +59,8 @@ func createCredential() (offer *credential.CredentialOffer, err error) {
 		return nil, err
 	}
 
+	fmt.Println(ev)
+
 	var rep messaging.IssuanceReply
 
 	err = json.Unmarshal(ev.Data(), &rep)

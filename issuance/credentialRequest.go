@@ -13,10 +13,11 @@ import (
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/metadata"
 	issumsg "github.com/eclipse-xfsc/oid4-vci-issuer-service/pkg/messaging"
+	"github.com/eclipse-xfsc/oid4-vci-vp-library/model/credential"
 	"github.com/google/uuid"
 )
 
-func createCredential(id string, payload map[string]interface{}, storage IssuanceStorage, identifier string) error {
+func createCredential(code string, payload map[string]interface{}, storage IssuanceStorage, identifier string) error {
 	var credJson = make(map[string]interface{})
 
 	credJson = map[string]interface{}{
@@ -41,7 +42,7 @@ func createCredential(id string, payload map[string]interface{}, storage Issuanc
 		credJson["type"] = []string{"VerifiableCredential", "DeveloperCredential"}
 	}
 
-	err := storage.AddCredential(id, credJson)
+	err := storage.AddCredential(code, credJson)
 
 	if err != nil {
 		return err
@@ -78,19 +79,24 @@ func CredentialRequest(conf config.Config, storage IssuanceStorage) {
 				Reply: common.Reply{
 					TenantId:  req.TenantId,
 					RequestId: req.RequestId,
+					GroupId:   req.GroupId,
 				},
 			}
-			id := uuid.NewString()
+
 			nonce := uuid.NewString()
 			offerReq := issumsg.OfferingURLReq{
 				Request: common.Request{
 					TenantId:  req.TenantId,
 					RequestId: req.RequestId,
+					GroupId:   reply.GroupId,
 				},
 				Params: issumsg.AuthorizationReq{
-					CredentialType:       req.Identifier,
-					CredentialIdentifier: []string{id},
-					GrantType:            "urn:ietf:params:oauth:grant-type:pre-authorized_code",
+					CredentialConfigurations: []credential.CredentialConfigurationIdentifier{
+						credential.CredentialConfigurationIdentifier{
+							Id: req.Identifier,
+						},
+					},
+					GrantType: "urn:ietf:params:oauth:grant-type:pre-authorized_code",
 					TwoFactor: issumsg.TwoFactor{
 						Enabled: false,
 					},
@@ -127,7 +133,7 @@ func CredentialRequest(conf config.Config, storage IssuanceStorage) {
 				err = json.Unmarshal(authrep.Data(), &resp)
 
 				if err == nil {
-					err = createCredential(id, req.Payload, storage, req.Identifier)
+					err = createCredential(resp.Code, req.Payload, storage, req.Identifier)
 				}
 
 				if err != nil {
