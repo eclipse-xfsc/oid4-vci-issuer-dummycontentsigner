@@ -56,7 +56,7 @@ func signCredential(credential map[string]interface{}, tenantId string, signerke
 	client := &http.Client{}
 	res, err := client.Do(r)
 	if err != nil || res.StatusCode != 200 {
-		if res.StatusCode != 200 {
+		if res != nil && res.StatusCode != 200 {
 			b, _ := io.ReadAll(res.Body)
 			return nil, errors.New("signer service returned no 200: " + string(b))
 		}
@@ -111,11 +111,21 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 				Reply: common.Reply{
 					TenantId:  req.TenantId,
 					RequestId: req.RequestId,
+					GroupId:   req.GroupId,
 				},
 				Format: req.Format,
 			}
 
-			cred, err := storage.GetCredential(req.CredentialIdentifier)
+			cred, err := storage.GetCredential(req.Code)
+
+			if err != nil || cred == nil {
+				log.Printf("Error %+v", err)
+				reply.Error = &common.Error{
+					Id:     "no credential found",
+					Status: 400,
+					Msg:    err.Error(),
+				}
+			}
 
 			if req.Format == "" {
 				reply.Format = cred["format"].(string)
@@ -130,7 +140,9 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 				}
 			} else {
 
-				cred["holder"] = req.Holder
+				if req.Holder != "" {
+					cred["holder"] = req.Holder
+				}
 
 				c, err := signCredential(cred, req.TenantId, conf.SignerKey, conf.SignerUrl, conf.Origin, req.Code, reply.Format)
 

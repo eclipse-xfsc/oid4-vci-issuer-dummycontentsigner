@@ -58,7 +58,7 @@ var Registration = messaging.IssuerRegistration{
 							}},
 					},
 				},
-				ProofTypesSupported: map[string]credential.ProofType{
+				ProofTypesSupported: map[credential.ProofVariant]credential.ProofType{
 					"ldp_vc": {
 						ProofSigningAlgValuesSupported: []string{"ES256"},
 					},
@@ -130,12 +130,8 @@ var Registration = messaging.IssuerRegistration{
 							}},
 					},
 				},
-				Vct: &vct,
-				ProofTypesSupported: map[string]credential.ProofType{
-					"jwt": {
-						ProofSigningAlgValuesSupported: []string{"ES256"},
-					},
-				},
+				Vct:                 &vct,
+				ProofTypesSupported: map[credential.ProofVariant]credential.ProofType{},
 				Display: []credential.LocalizedCredential{
 					{
 						Name:   "SDJWT Credential",
