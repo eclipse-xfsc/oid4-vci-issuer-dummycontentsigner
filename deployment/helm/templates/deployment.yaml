@@ -55,12 +55,3 @@ spec:
         ports:
         - name: http
           containerPort: {{ .Values.server.http.port }}
-        readinessProbe:
-          httpGet:
-            path: /isAlive
-            port: {{ .Values.server.http.port }}
-          initialDelaySeconds: 5
-          periodSeconds: 5
-          successThreshold: 2
-          failureThreshold: 2
-          timeoutSeconds: 5
