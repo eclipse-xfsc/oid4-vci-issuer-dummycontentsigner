@@ -17,8 +17,7 @@ image:
 
 podAnnotations: 
     inject.xfsc.io/enabled: "false"
-    inject.xfsc.io/needs: "nats"
-    inject.xfsc.io/env-prefix: "ISSUANCE"
+    inject.xfsc.io/needs: "nats, signer"
 
 resources:
   # requests:
