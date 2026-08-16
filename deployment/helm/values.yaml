@@ -15,7 +15,9 @@ image:
   # -- Image pull secret when internal image is used
   #pullSecrets: key
 
-podAnnotations: {}
+podAnnotations: 
+    inject.xfsc.io/enabled: "false"
+    inject.xfsc.io/needs: "nats, signer"
 
 resources:
   # requests:
@@ -39,9 +41,7 @@ security:
   runAsUid: 1000
   runAsGid: 1000
 config:
-    origin: "https://cloud-wallet.xfsc.dev"
-    signerUrl: http://signer.default.svc.cluster.local:8080/v1/credential
-    signerKey: signerkey
+    signerCredentialUrl: http://signer.default.svc.cluster.local:8080/v1/credential
     credential_issuer: 
     authorization_server: 
     credential_endpoint:
