@@ -8,4 +8,8 @@ type Config struct {
 	Credential_Issuer    string                        `envconfig:"CREDENTIAL_ISSUER"`
 	Authorization_Server []string                      `envconfig:"AUTHORIZATION_SERVER"`
 	Credential_Endpoint  string                        `envconfig:"CREDENTIAL_ENDPOINT"`
+
+	HttpHost string `envconfig:"HTTP_HOST" default:"0.0.0.0"`
+
+	HttpPort int `envconfig:"HTTP_PORT" default:"8080"`
 }

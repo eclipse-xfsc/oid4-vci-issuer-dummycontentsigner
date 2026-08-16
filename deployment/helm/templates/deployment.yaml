@@ -53,17 +53,28 @@ spec:
             value: {{ .Values.config.credential_endpoint }}
           - name: "NATS_QUEUE_GROUP"
             value: {{ .Values.config.nats.queuegroup }}      
-         
+          - name: "HTTP_HOST"
+            value: {{ .Values.server.http.host | quote }}
+          - name: "HTTP_PORT"
+            value: {{ .Values.server.http.port | quote }}
                 
         ports:
         - name: http
           containerPort: {{ .Values.server.http.port }}
         readinessProbe:
           httpGet:
-            path: /isAlive
+            path: /health
             port: {{ .Values.server.http.port }}
           initialDelaySeconds: 5
           periodSeconds: 5
           successThreshold: 2
           failureThreshold: 2
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.server.http.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
           timeoutSeconds: 5
