@@ -33,24 +33,27 @@ spec:
         image: "{{ .Values.image.repository }}/{{ .Values.image.name }}:{{ default .Chart.AppVersion .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         env:
-          - name: "ORIGIN"
-            value: {{ .Values.config.origin }}
+          {{- $podAnnotations := default dict .Values.podAnnotations }}
+          {{- $injectionEnabled := eq (default "false" (index $podAnnotations "inject.xfsc.io/enabled")) "true" }}
+
+          {{- if not $injectionEnabled }}
+          - name: "SIGNER_CREDENTIAL_URL"
+            value: {{ .Values.config.signerUrl }}
+          - name: "NATS_REQUEST_TIMEOUT"
+            value: {{ .Values.config.nats.requestTimeOut }} 
+          - name: "NATS_URL"
+            value: {{ .Values.config.nats.url }}
+          {{- end }}
+
           - name: "CREDENTIAL_ISSUER"
             value: {{ .Values.config.credential_issuer }}
           - name: "AUTHORIZATION_SERVER"
             value: "{{ join "," .Values.config.authorization_server }}"
           - name: "CREDENTIAL_ENDPOINT"
             value: {{ .Values.config.credential_endpoint }}
-          - name: "SIGNERURL"
-            value: {{ .Values.config.signerUrl }}
-          - name: "SIGNERKEY"
-            value: {{ .Values.config.signerKey }}
-          - name: "NATS_URL"
-            value: {{ .Values.config.nats.url }}
           - name: "NATS_QUEUE_GROUP"
             value: {{ .Values.config.nats.queuegroup }}      
-          - name: "NATS_REQUEST_TIMEOUT"
-            value: {{ .Values.config.nats.requestTimeOut }} 
+         
                 
         ports:
         - name: http
