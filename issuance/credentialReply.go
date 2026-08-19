@@ -146,7 +146,7 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 					cred["holder"] = req.Holder
 				}
 
-				c, err := signCredential(cred, req.TenantId, req.SignerKey, conf.SignerCredentialUrl, req.Origin, req.Code, reply.Format)
+				c, err := signCredential(cred, req.TenantId, req.SignerKey, conf.SignerCredentialUrl, req.Origin, req.Code, reply.Format, req.GroupId)
 
 				if err != nil {
 					return nil, err
