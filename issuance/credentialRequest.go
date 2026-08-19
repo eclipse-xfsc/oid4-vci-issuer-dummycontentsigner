@@ -3,6 +3,8 @@ package issuance
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/eclipse-xfsc/nats-message-library/common"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/metadata"
+	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/tenant"
 	issumsg "github.com/eclipse-xfsc/oid4-vci-issuer-service/pkg/messaging"
 	"github.com/eclipse-xfsc/oid4-vci-vp-library/model/credential"
 	"github.com/google/uuid"
@@ -31,8 +34,6 @@ func createCredential(code string, payload map[string]interface{}, storage Issua
 
 	credJson["credentialSubject"] = payload
 
-	credJson["issuer"] = metadata.Registration.Issuer.CredentialIssuer
-
 	if identifier == metadata.Credential_Identifier2 {
 		credJson["format"] = "vc+sd-jwt"
 		credJson["type"] = []string{"VerifiableCredential", "SDJWTCredential"}
@@ -51,7 +52,7 @@ func createCredential(code string, payload map[string]interface{}, storage Issua
 	return nil
 }
 
-func CredentialRequest(conf config.Config, storage IssuanceStorage) {
+func CredentialRequest(conf config.Config, registry *tenant.Registry, storage IssuanceStorage) {
 
 	authclient, _ := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
@@ -62,7 +63,7 @@ func CredentialRequest(conf config.Config, storage IssuanceStorage) {
 	client, _ := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypeRep,
-		metadata.Registration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".request",
+		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".request",
 	)
 
 	for {
@@ -73,6 +74,12 @@ func CredentialRequest(conf config.Config, storage IssuanceStorage) {
 
 			if err != nil {
 				return nil, err
+			}
+
+			_, ok := registry.Get(req.TenantId)
+
+			if !ok {
+				return nil, errors.New(fmt.Sprintf("cannot prepare credential, tenant %s not reqistered", req.TenantId))
 			}
 
 			reply := messaging.IssuanceReply{

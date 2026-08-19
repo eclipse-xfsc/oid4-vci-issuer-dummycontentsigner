@@ -14,10 +14,6 @@
                 "SIGNERURL":"http://localhost:8888/v1/credential",
                 "SIGNERKEY":"signerkey",
                 "NATS_REQUEST_TIMEOUT":"1m10s",
-                "ORIGIN": "http://localhost",
-                "CREDENTIAL_ISSUER":"http://localhost",
-                "AUTHORIZATION_SERVER":"http://localhost:8081",
-                "CREDENTIAL_ENDPOINT":"",
                 "NATS_URL":"nats://localhost:4222",     
             }
         }

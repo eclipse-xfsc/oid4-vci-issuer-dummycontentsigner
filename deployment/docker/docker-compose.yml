@@ -1,0 +1,39 @@
+services:
+  nats:
+    image: nats:2.11-alpine
+    container_name: nats
+    command:
+      - "-js"
+      - "-m"
+      - "8222"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    restart: unless-stopped
+
+  crypto-provider-local-plugin:
+    image: node-654e3bca7fbeeed18f81d7c7.de-west-1.xaas.plus.cloud/tsa/crypto-provider-local-plugin:v2.0.2
+    container_name: crypto-provider-local-plugin
+    expose:
+      - "50051"
+    restart: unless-stopped
+
+  signer:
+    image: node-654e3bca7fbeeed18f81d7c7.de-west-1.xaas.plus.cloud/tsa/signer:2.2.0
+    container_name: signer
+    depends_on:
+      - crypto-provider-local-plugin
+      - nats
+    environment:
+      HTTP_HOST: "0.0.0.0"
+      HTTP_PORT: "8080"
+      NATS_TOPIC: "signer-topic"
+      # NATS
+      NATS_HOST: "nats://nats:4222"
+
+      # Crypto Provider
+      CRYPTO_GRPC_ADDR: "crypto-provider-local-plugin:50051"
+
+    ports:
+      - "8085:8080"
+    restart: unless-stopped
