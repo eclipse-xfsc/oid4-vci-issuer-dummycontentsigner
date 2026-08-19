@@ -20,7 +20,7 @@ import (
 	issuance "github.com/eclipse-xfsc/oid4-vci-issuer-service/pkg/messaging"
 )
 
-func signCredential(credential map[string]interface{}, tenantId string, signerkey string, url string, origin string, nonce string, format string) (any, error) {
+func signCredential(credential map[string]interface{}, tenantId, signerkey, url, origin, nonce, format, groupId string) (any, error) {
 
 	env := os.Getenv("DUMMYCONTENTSIGNER_STATUS")
 	var err error
@@ -35,7 +35,7 @@ func signCredential(credential map[string]interface{}, tenantId string, signerke
 	}
 
 	credential["namespace"] = tenantId
-	credential["group"] = ""
+	credential["group"] = groupId
 	credential["key"] = signerkey
 	credential["status"] = status
 	credential["nonce"] = nonce
