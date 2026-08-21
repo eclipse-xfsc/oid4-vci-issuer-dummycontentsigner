@@ -6,7 +6,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 	github.com/eclipse-xfsc/cloud-event-provider v0.1.5
 	github.com/eclipse-xfsc/nats-message-library v1.3.0
-	github.com/eclipse-xfsc/oid4-vci-issuer-service v1.5.3
+	github.com/eclipse-xfsc/oid4-vci-issuer-service v1.6.0
 	github.com/eclipse-xfsc/oid4-vci-vp-library v1.6.5
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0

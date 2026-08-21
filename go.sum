@@ -66,6 +66,8 @@ github.com/eclipse-xfsc/oid4-vci-issuer-service v1.4.2-dev h1:4BHicBJQzi+R6sMl2w
 github.com/eclipse-xfsc/oid4-vci-issuer-service v1.4.2-dev/go.mod h1:Bs1b4YolkHwWTKzdWMt9djCVoWo4bfqRFkIvY22QPjk=
 github.com/eclipse-xfsc/oid4-vci-issuer-service v1.5.3 h1:G7zuSMLqqB8imzplcQsLjbXlPByiLJmlTbiepldQNzw=
 github.com/eclipse-xfsc/oid4-vci-issuer-service v1.5.3/go.mod h1:VVpVNyDWJ21wYp7PckhdI9nmAWUAM7pGzrbj2RJYeQs=
+github.com/eclipse-xfsc/oid4-vci-issuer-service v1.6.0 h1:tEzDdwQTAYN+05XkOqQxcjnrmU51QSl6a3zmSoOSgVw=
+github.com/eclipse-xfsc/oid4-vci-issuer-service v1.6.0/go.mod h1:VVpVNyDWJ21wYp7PckhdI9nmAWUAM7pGzrbj2RJYeQs=
 github.com/eclipse-xfsc/oid4-vci-vp-library v1.4.6 h1:7s9z5MMesQyCx4BgWPzG6CovBunLnBqmSKwDzTqa+6A=
 github.com/eclipse-xfsc/oid4-vci-vp-library v1.4.6/go.mod h1:EW5YtHCsHsRdAuxF8Xp5a7PRi1kzsAETXf4+0RH3wyw=
 github.com/eclipse-xfsc/oid4-vci-vp-library v1.6.2 h1:mulhLTNIEYAjb6zMfPTnD7tqL8+q9hO8smVhTAZz0k4=
