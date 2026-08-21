@@ -52,11 +52,7 @@ var BaseRegistration = messaging.IssuerRegistration{
 						},
 					},
 				},
-				ProofTypesSupported: map[credential.ProofVariant]credential.ProofType{
-					"ldp_vc": {
-						ProofSigningAlgValuesSupported: []string{"ES256"},
-					},
-				},
+				ProofTypesSupported: map[credential.ProofVariant]credential.ProofType{},
 				Display: []credential.LocalizedCredential{
 					{
 						Name:   "Developer Credential",
