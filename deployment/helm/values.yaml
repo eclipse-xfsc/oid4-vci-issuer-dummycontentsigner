@@ -15,10 +15,9 @@ image:
   # -- Image pull secret when internal image is used
   #pullSecrets: key
 
-podAnnotations: 
+podAnnotations:
     inject.xfsc.io/enabled: "false"
     inject.xfsc.io/needs: "nats, signer"
-
 resources:
   # requests:
   #   cpu: 25m
@@ -35,19 +34,13 @@ server:
   http:
     host: "0.0.0.0"
     port: 8080
-
 security:
   runAsNonRoot: false
   runAsUid: 1000
   runAsGid: 1000
 config:
     signerCredentialUrl: http://signer.default.svc.cluster.local:8080/v1/credential
-    credential_issuer: 
-    authorization_server: 
-    credential_endpoint:
     nats:
       url: nats://nats.nats.svc.cluster.local:4222
       queuegroup: dummysigner
       requestTimeOut: 10s
-
- 

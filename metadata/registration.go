@@ -9,6 +9,7 @@ import (
 	messaging "github.com/eclipse-xfsc/nats-message-library"
 	"github.com/eclipse-xfsc/nats-message-library/common"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
+	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/tenant"
 	"github.com/eclipse-xfsc/oid4-vci-vp-library/model/credential"
 	"github.com/google/uuid"
 )
@@ -18,15 +19,8 @@ const Credential_Identifier2 = "SDJWTCredential"
 
 var vct = "SD_JWT_DEVELOPER_CREDENTIAL"
 
-var Registration = messaging.IssuerRegistration{
-	Request: common.Request{
-		TenantId:  "tenant_space",
-		RequestId: uuid.NewString(),
-	},
+var BaseRegistration = messaging.IssuerRegistration{
 	Issuer: credential.IssuerMetadata{
-		CredentialIssuer:     "https://cloud-wallet.xfsc.dev",
-		AuthorizationServers: []string{"https://auth-cloud-wallet.xfsc.dev/realms/master", "https://cloud-wallet.xfsc.dev"},
-		CredentialEndpoint:   "https://cloud-wallet.xfsc.dev/api/issuance/credential",
 		CredentialResponseEncryption: credential.CredentialRespEnc{
 			EncryptionRequired: false,
 		},
@@ -45,17 +39,17 @@ var Registration = messaging.IssuerRegistration{
 					Type:    []string{"VerifiableCredential", "UniversityDegreeCredential"},
 					CredentialSubject: map[string]credential.CredentialSubject{
 						"given_name": {
-							Display: []credential.Display{credential.Display{
+							Display: []credential.Display{{
 								Name:   "Given Name",
 								Locale: "en-US",
 							}},
 						},
 						"family_name": {
-							Display: []credential.Display{credential.Display{
+							Display: []credential.Display{{
 								Name:   "Surname",
 								Locale: "en-US",
-							},
 							}},
+						},
 					},
 				},
 				ProofTypesSupported: map[credential.ProofVariant]credential.ProofType{
@@ -117,17 +111,17 @@ var Registration = messaging.IssuerRegistration{
 					Type: []string{"VerifiableCredential", "SDJWTCredential"},
 					CredentialSubject: map[string]credential.CredentialSubject{
 						"given_name": {
-							Display: []credential.Display{credential.Display{
+							Display: []credential.Display{{
 								Name:   "Given Name",
 								Locale: "en-US",
 							}},
 						},
 						"family_name": {
-							Display: []credential.Display{credential.Display{
+							Display: []credential.Display{{
 								Name:   "Surname",
 								Locale: "en-US",
-							},
 							}},
+						},
 					},
 				},
 				Vct:                 &vct,
@@ -182,20 +176,19 @@ var Registration = messaging.IssuerRegistration{
 	},
 }
 
-func Publish(conf config.Config) {
-
-	if conf.Credential_Issuer != "" {
-		Registration.Issuer.CredentialIssuer = conf.Credential_Issuer
+func BuildRegistration(tenantConfig tenant.Config) messaging.IssuerRegistration {
+	registration := BaseRegistration
+	registration.Request = common.Request{
+		TenantId:  tenantConfig.TenantID,
+		RequestId: uuid.NewString(),
 	}
+	registration.Issuer.CredentialIssuer = tenantConfig.CredentialIssuer
+	registration.Issuer.AuthorizationServers = tenantConfig.AuthorizationServers
+	registration.Issuer.CredentialEndpoint = tenantConfig.CredentialEndpoint
+	return registration
+}
 
-	if conf.Authorization_Server != nil && len(conf.Authorization_Server) > 0 {
-		Registration.Issuer.AuthorizationServers = conf.Authorization_Server
-	}
-
-	if conf.Credential_Endpoint != "" {
-		Registration.Issuer.CredentialEndpoint = conf.Credential_Endpoint
-	}
-
+func Publish(conf config.Config, registry *tenant.Registry) {
 	client, err := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypePub,
@@ -205,26 +198,27 @@ func Publish(conf config.Config) {
 		panic(err)
 	}
 
-	interval := time.NewTicker(time.Second * 30)
+	interval := time.NewTicker(30 * time.Second)
+	defer interval.Stop()
 
-	data, err := json.Marshal(Registration)
-	if err != nil {
-		panic(err)
-	}
+	for range interval.C {
+		for _, tenantConfig := range registry.List() {
+			registration := BuildRegistration(tenantConfig)
+			data, err := json.Marshal(registration)
+			if err != nil {
+				log.Printf("failed to marshal registration for tenant %s: %v", tenantConfig.TenantID, err)
+				continue
+			}
 
-	event, err := cloudeventprovider.NewEvent("test-issuer", messaging.EventTypeIssuerRegistration, data)
-	if err != nil {
-		panic(err)
-	}
+			event, err := cloudeventprovider.NewEvent("test-issuer", messaging.EventTypeIssuerRegistration, data)
+			if err != nil {
+				log.Printf("failed to create registration event for tenant %s: %v", tenantConfig.TenantID, err)
+				continue
+			}
 
-	for {
-		<-interval.C
-
-		if err := client.Pub(event); err != nil {
-			log.Printf("%+v", err)
-			continue
+			if err := client.Pub(event); err != nil {
+				log.Printf("failed to publish registration for tenant %s: %v", tenantConfig.TenantID, err)
+			}
 		}
-
-		//log.Printf("send event: %s", Registration.Issuer.CredentialIssuer)
 	}
 }

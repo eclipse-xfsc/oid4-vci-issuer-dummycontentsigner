@@ -9,6 +9,7 @@ import (
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/issuance"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/metadata"
+	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/tenant"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -22,22 +23,17 @@ func main() {
 	}
 
 	storage := new(issuance.DummyStorage)
+	tenantRegistry := tenant.NewRegistry()
 
-	go startHealthServer()
-
-	//publish metadata
-	go metadata.Publish(conf)
-
-	//reply to credential request
+	go startHTTPServer(tenantRegistry)
+	go metadata.Publish(conf, tenantRegistry)
 	go issuance.CredentialReply(conf, storage)
-
-	go issuance.CredentialRequest(conf, storage)
+	go issuance.CredentialRequest(conf, tenantRegistry, storage)
 
 	wg.Wait()
 }
 
-func startHealthServer() {
-
+func startHTTPServer(tenantRegistry *tenant.Registry) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -50,10 +46,12 @@ func startHealthServer() {
 			log.Printf("failed to write health response: %v", err)
 		}
 	})
-	addr := fmt.Sprintf("%s:%d", conf.HttpHost, conf.HttpPort)
-	log.Printf("starting health server on %s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
-		log.Fatalf("health server failed: %v", err)
-	}
 
+	tenant.RegisterHTTPHandlers(mux, tenantRegistry)
+
+	addr := fmt.Sprintf("%s:%d", conf.HttpHost, conf.HttpPort)
+	log.Printf("starting HTTP server on %s", addr)
+	if err := http.ListenAndServe(addr, mux); err != nil {
+		log.Fatalf("HTTP server failed: %v", err)
+	}
 }

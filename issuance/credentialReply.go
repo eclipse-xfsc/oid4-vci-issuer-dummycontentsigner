@@ -91,7 +91,7 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 	client, err := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypeRep,
-		metadata.Registration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".issue",
+		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".issue",
 	)
 	if err != nil {
 		panic(err)
@@ -126,6 +126,8 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 					Msg:    err.Error(),
 				}
 			}
+
+			cred["issuer"] = req.Origin
 
 			if req.Format == "" {
 				reply.Format = cred["format"].(string)

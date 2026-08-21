@@ -35,29 +35,20 @@ spec:
         env:
           {{- $podAnnotations := default dict .Values.podAnnotations }}
           {{- $injectionEnabled := eq (default "false" (index $podAnnotations "inject.xfsc.io/enabled")) "true" }}
-
           {{- if not $injectionEnabled }}
           - name: "SIGNER_CREDENTIAL_URL"
-            value: {{ .Values.config.signerUrl }}
+            value: {{ .Values.config.signerCredentialUrl | quote }}
           - name: "NATS_REQUEST_TIMEOUT"
-            value: {{ .Values.config.nats.requestTimeOut }} 
+            value: {{ .Values.config.nats.requestTimeOut | quote }}
           - name: "NATS_URL"
-            value: {{ .Values.config.nats.url }}
+            value: {{ .Values.config.nats.url | quote }}
           {{- end }}
-
-          - name: "CREDENTIAL_ISSUER"
-            value: {{ .Values.config.credential_issuer }}
-          - name: "AUTHORIZATION_SERVER"
-            value: "{{ join "," .Values.config.authorization_server }}"
-          - name: "CREDENTIAL_ENDPOINT"
-            value: {{ .Values.config.credential_endpoint }}
           - name: "NATS_QUEUE_GROUP"
-            value: {{ .Values.config.nats.queuegroup }}      
+            value: {{ .Values.config.nats.queuegroup | quote }}
           - name: "HTTP_HOST"
             value: {{ .Values.server.http.host | quote }}
           - name: "HTTP_PORT"
             value: {{ .Values.server.http.port | quote }}
-                
         ports:
         - name: http
           containerPort: {{ .Values.server.http.port }}
