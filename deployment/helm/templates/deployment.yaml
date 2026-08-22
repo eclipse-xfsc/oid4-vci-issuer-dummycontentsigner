@@ -45,6 +45,8 @@ spec:
           {{- end }}
           - name: "NATS_QUEUE_GROUP"
             value: {{ .Values.config.nats.queuegroup | quote }}
+          - name: "DUMMYCONTENTSIGNER_STATUS"
+            value: "true"
           - name: "HTTP_HOST"
             value: {{ .Values.server.http.host | quote }}
           - name: "HTTP_PORT"
