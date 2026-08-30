@@ -93,7 +93,7 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 	client, err := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypeRep,
-		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".issue",
+		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier].Subject+".issue",
 	)
 	if err != nil {
 		panic(err)
