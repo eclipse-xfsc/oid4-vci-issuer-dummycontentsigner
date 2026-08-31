@@ -41,7 +41,9 @@ func upsertTenant(w http.ResponseWriter, r *http.Request, registry *Registry, te
 		return
 	}
 
-	if request.CredentialIssuer == "" || request.CredentialEndpoint == "" || len(request.AuthorizationServers) == 0 {
+	if request.CredentialIssuer == "" ||
+		request.CredentialEndpoint == "" ||
+		len(request.AuthorizationServers) == 0 {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "credentialIssuer, authorizationServers and credentialEndpoint are required"})
 		return
 	}
@@ -51,7 +53,9 @@ func upsertTenant(w http.ResponseWriter, r *http.Request, registry *Registry, te
 		CredentialIssuer:     request.CredentialIssuer,
 		AuthorizationServers: request.AuthorizationServers,
 		CredentialEndpoint:   request.CredentialEndpoint,
+		NonceEndpoint:        request.NonceEndpoint,
 	}
+
 	registry.Put(config)
 	writeJSON(w, http.StatusOK, config)
 }

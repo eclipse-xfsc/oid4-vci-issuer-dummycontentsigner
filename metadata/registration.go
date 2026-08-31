@@ -263,6 +263,8 @@ func BuildRegistration(
 	registration.Issuer.CredentialEndpoint =
 		tenantConfig.CredentialEndpoint
 
+	registration.Issuer.NonceEndpoint = tenantConfig.NonceEndpoint
+
 	return registration
 }
 
