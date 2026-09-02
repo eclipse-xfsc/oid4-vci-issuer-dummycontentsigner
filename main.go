@@ -27,7 +27,7 @@ func main() {
 
 	go startHTTPServer(tenantRegistry)
 	go metadata.Publish(conf, tenantRegistry)
-	go issuance.CredentialReply(conf, storage)
+	go issuance.CredentialReply(conf, storage, tenantRegistry)
 	go issuance.CredentialRequest(conf, tenantRegistry, storage)
 
 	wg.Wait()

@@ -6,6 +6,7 @@ type Config struct {
 	AuthorizationServers []string `json:"authorizationServers"`
 	CredentialEndpoint   string   `json:"credentialEndpoint"`
 	NonceEndpoint        *string  `json:"nonceEndpoint"`
+	StatusEndpoint       *string  `json:"statusEndpoint"`
 }
 
 type UpsertRequest struct {

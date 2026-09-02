@@ -17,10 +17,11 @@ import (
 	"github.com/eclipse-xfsc/nats-message-library/common"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/metadata"
+	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/tenant"
 	issuance "github.com/eclipse-xfsc/oid4-vci-issuer-service/pkg/messaging"
 )
 
-func signCredential(credential map[string]interface{}, tenantId, groupid, namespace, signerkey, url, origin, nonce, format, group string) (any, error) {
+func signCredential(credential map[string]interface{}, tenantId, groupid, namespace, signerkey, url, origin, statusurl, nonce, format, group string) (any, error) {
 
 	env := os.Getenv("DUMMYCONTENTSIGNER_STATUS")
 	var err error
@@ -53,7 +54,7 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	r.Header.Add("Content-Type", "application/json")
-	r.Header.Add("x-origin", origin)
+	r.Header.Add("x-origin", statusurl)
 	r.Header.Add("x-tenantid", tenantId)
 	r.Header.Add("x-groupid", groupid)
 
@@ -94,7 +95,7 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 	return strings.Trim(strings.Replace(string(b), "\"", "", -1), "\n"), nil
 }
 
-func CredentialReply(conf config.Config, storage IssuanceStorage) {
+func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tenant.Registry) {
 
 	client, err := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
@@ -153,8 +154,14 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 				if req.Holder != "" {
 					cred["holder"] = req.Holder
 				}
+				t, ok := registry.Get(req.TenantId)
+				statusurl := req.Origin
 
-				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, req.Code, reply.Format, req.Group)
+				if ok {
+					statusurl = *t.StatusEndpoint
+				}
+
+				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, statusurl, req.Code, reply.Format, req.Group)
 
 				if err != nil {
 					return nil, err
