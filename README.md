@@ -24,7 +24,8 @@ Content-Type: application/json
   "authorizationServers": [
     "https://tenant-a.example.org/auth"
   ],
-  "credentialEndpoint": "https://tenant-a.example.org/api/issuance/credential"
+  "credentialEndpoint": "https://tenant-a.example.org/api/issuance/credential",
+  "nonceEndpoint": "https://tenant-a.example.org/api/issuance/credential"
 }
 ```
 
@@ -38,7 +39,8 @@ curl -X PUT http://localhost:8080/internal/tenants/demo \
     "authorizationServers": [
       "https://demo.example.org/auth"
     ],
-    "credentialEndpoint": "https://demo.example.org/api/issuance/credential"
+    "credentialEndpoint": "https://demo.example.org/api/issuance/credential",
+    "nonceEndpoint": "https://tenant-a.example.org/api/issuance/credential"
   }'
 ```
 

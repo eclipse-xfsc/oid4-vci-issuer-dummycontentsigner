@@ -40,6 +40,12 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 	credential["status"] = status
 	credential["nonce"] = nonce
 
+	if format == "ldp_vc" {
+		credential["statuslisttype"] = "BitstringStatusList"
+	} else {
+		credential["statuslisttype"] = "application/statuslist+jwt"
+	}
+
 	body, err := json.Marshal(credential)
 	if err != nil {
 		return nil, err
