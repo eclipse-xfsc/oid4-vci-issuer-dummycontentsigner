@@ -162,16 +162,36 @@ func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tena
 						statusurl = *t.StatusEndpoint
 					}
 
-					// Keep the vct in the issued SD-JWT aligned with the tenant-specific
-					// issuer metadata and with the Type Metadata endpoint.
 					if reply.Format == "dc+sd-jwt" {
+
 						registration := metadata.BuildRegistration(t)
-						configuration := registration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier2]
+						configuration, exists :=
+							registration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier2]
+						log.Printf(
+							"SD-JWT configuration: exists=%t schemaEndpoint=%v vct=%v",
+							exists,
+							t.SchemaEndpoint,
+							configuration.Vct,
+						)
 						if configuration.Vct != nil && *configuration.Vct != "" {
+							log.Printf(
+								"overwriting credential vct: old=%v new=%s",
+								cred["vct"],
+								*configuration.Vct,
+							)
 							cred["vct"] = *configuration.Vct
 						}
+
 					}
 				}
+
+				log.Printf(
+
+					"credential before signing: format=%s vct=%v credential=%+v",
+					reply.Format,
+					cred["vct"],
+					cred,
+				)
 
 				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, statusurl, req.Code, reply.Format, req.Group)
 
