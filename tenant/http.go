@@ -130,6 +130,7 @@ func upsertTenant(
 		CredentialEndpoint:   request.CredentialEndpoint,
 		NonceEndpoint:        request.NonceEndpoint,
 		StatusEndpoint:       request.StatusEndpoint,
+		SchemaEndpoint:       request.SchemaEndpoint,
 	}
 
 	registry.Put(config)

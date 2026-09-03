@@ -3,6 +3,7 @@ package metadata
 import (
 	"encoding/json"
 	"log"
+	"strings"
 	"time"
 
 	cloudeventprovider "github.com/eclipse-xfsc/cloud-event-provider"
@@ -264,6 +265,18 @@ func BuildRegistration(
 		tenantConfig.CredentialEndpoint
 
 	registration.Issuer.NonceEndpoint = tenantConfig.NonceEndpoint
+
+	config := registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2]
+
+	if tenantConfig.SchemaEndpoint != nil {
+		vctURL := strings.TrimRight(*tenantConfig.SchemaEndpoint, "/") +
+			"/" +
+			strings.TrimLeft(vct, "/")
+
+		config.Vct = &vctURL
+
+		registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2] = config
+	}
 
 	return registration
 }
