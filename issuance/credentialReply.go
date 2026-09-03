@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -95,6 +97,19 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 	return strings.Trim(strings.Replace(string(b), "\"", "", -1), "\n"), nil
 }
 
+func originToDIDWeb(origin string) (string, error) {
+
+	u, err := url.Parse(origin)
+	if err != nil {
+		return "", err
+	}
+	if u.Hostname() == "" {
+		return "", fmt.Errorf("invalid origin: %s", origin)
+	}
+	return "did:web:" + u.Hostname(), nil
+
+}
+
 func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tenant.Registry) {
 
 	client, err := cloudeventprovider.New(
@@ -136,7 +151,7 @@ func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tena
 				}
 			}
 
-			cred["issuer"] = req.Origin
+			cred["issuer"], err = originToDIDWeb(req.Origin)
 
 			if req.Format == "" {
 				reply.Format = cred["format"].(string)
