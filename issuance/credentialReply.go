@@ -165,21 +165,15 @@ func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tena
 					if reply.Format == "dc+sd-jwt" {
 
 						registration := metadata.BuildRegistration(t)
-						configuration, exists :=
+						configuration :=
 							registration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier2]
-						log.Printf(
-							"SD-JWT configuration: exists=%t schemaEndpoint=%v vct=%v",
-							exists,
-							t.SchemaEndpoint,
-							configuration.Vct,
-						)
-						if configuration.Vct != nil && *configuration.Vct != "" {
-							log.Printf(
-								"overwriting credential vct: old=%v new=%s",
-								cred["vct"],
-								*configuration.Vct,
-							)
-							cred["vct"] = *configuration.Vct
+						if configuration.Vct != nil &&
+							strings.TrimSpace(*configuration.Vct) != "" {
+							vct := *configuration.Vct
+							// Actual SD-JWT payload used by the signer
+							if payload, ok := cred["credentialSubject"].(map[string]interface{}); ok {
+								payload["vct"] = vct
+							}
 						}
 
 					}
