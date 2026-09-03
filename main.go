@@ -48,6 +48,7 @@ func startHTTPServer(tenantRegistry *tenant.Registry) {
 	})
 
 	tenant.RegisterHTTPHandlers(mux, tenantRegistry)
+	metadata.RegisterTypeMetadataHTTPHandlers(mux, tenantRegistry)
 
 	addr := fmt.Sprintf("%s:%d", conf.HttpHost, conf.HttpPort)
 	log.Printf("starting HTTP server on %s", addr)

@@ -158,7 +158,19 @@ func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tena
 				statusurl := req.Origin
 
 				if ok {
-					statusurl = *t.StatusEndpoint
+					if t.StatusEndpoint != nil && *t.StatusEndpoint != "" {
+						statusurl = *t.StatusEndpoint
+					}
+
+					// Keep the vct in the issued SD-JWT aligned with the tenant-specific
+					// issuer metadata and with the Type Metadata endpoint.
+					if reply.Format == "dc+sd-jwt" {
+						registration := metadata.BuildRegistration(t)
+						configuration := registration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier2]
+						if configuration.Vct != nil && *configuration.Vct != "" {
+							cred["vct"] = *configuration.Vct
+						}
+					}
 				}
 
 				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, statusurl, req.Code, reply.Format, req.Group)

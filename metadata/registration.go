@@ -250,6 +250,19 @@ func BuildRegistration(
 ) messaging.IssuerRegistration {
 	registration := BaseRegistration
 
+	// CredentialConfigurationsSupported is a map. A plain struct copy would
+	// keep sharing this map with BaseRegistration and therefore leak a
+	// tenant-specific VCT into subsequent tenants. Clone the map before any
+	// tenant-specific modification.
+	credentialConfigurations := make(
+		map[string]credential.CredentialConfiguration,
+		len(BaseRegistration.Issuer.CredentialConfigurationsSupported),
+	)
+	for id, configuration := range BaseRegistration.Issuer.CredentialConfigurationsSupported {
+		credentialConfigurations[id] = configuration
+	}
+	registration.Issuer.CredentialConfigurationsSupported = credentialConfigurations
+
 	registration.Request = common.Request{
 		TenantId:  tenantConfig.TenantID,
 		RequestId: uuid.NewString(),
@@ -266,16 +279,16 @@ func BuildRegistration(
 
 	registration.Issuer.NonceEndpoint = tenantConfig.NonceEndpoint
 
-	config := registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2]
+	configuration := registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2]
 
-	if tenantConfig.SchemaEndpoint != nil {
+	if tenantConfig.SchemaEndpoint != nil && strings.TrimSpace(*tenantConfig.SchemaEndpoint) != "" {
 		vctURL := strings.TrimRight(*tenantConfig.SchemaEndpoint, "/") +
 			"/" +
 			strings.TrimLeft(vct, "/")
 
-		config.Vct = &vctURL
+		configuration.Vct = &vctURL
 
-		registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2] = config
+		registration.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2] = configuration
 	}
 
 	return registration
