@@ -27,7 +27,7 @@ func main() {
 
 	go startHTTPServer(tenantRegistry)
 	go metadata.Publish(conf, tenantRegistry)
-	go issuance.CredentialReply(conf, storage)
+	go issuance.CredentialReply(conf, storage, tenantRegistry)
 	go issuance.CredentialRequest(conf, tenantRegistry, storage)
 
 	wg.Wait()
@@ -48,6 +48,7 @@ func startHTTPServer(tenantRegistry *tenant.Registry) {
 	})
 
 	tenant.RegisterHTTPHandlers(mux, tenantRegistry)
+	metadata.RegisterTypeMetadataHTTPHandlers(mux, tenantRegistry)
 
 	addr := fmt.Sprintf("%s:%d", conf.HttpHost, conf.HttpPort)
 	log.Printf("starting HTTP server on %s", addr)

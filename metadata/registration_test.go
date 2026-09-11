@@ -29,3 +29,34 @@ func TestBuildRegistrationUsesTenantCoreData(t *testing.T) {
 		t.Fatalf("expected static credential metadata to remain available")
 	}
 }
+
+func TestBuildRegistrationDoesNotLeakVCTBetweenTenants(t *testing.T) {
+	schemaA := "https://tenant-a.example.org/schema"
+	schemaB := "https://tenant-b.example.org/types"
+
+	registrationA := BuildRegistration(tenant.Config{
+		TenantID:             "tenant-a",
+		CredentialIssuer:     "https://tenant-a.example.org",
+		AuthorizationServers: []string{"https://tenant-a.example.org"},
+		CredentialEndpoint:   "https://tenant-a.example.org/api/credential",
+		SchemaEndpoint:       &schemaA,
+	})
+
+	registrationB := BuildRegistration(tenant.Config{
+		TenantID:             "tenant-b",
+		CredentialIssuer:     "https://tenant-b.example.org",
+		AuthorizationServers: []string{"https://tenant-b.example.org"},
+		CredentialEndpoint:   "https://tenant-b.example.org/api/credential",
+		SchemaEndpoint:       &schemaB,
+	})
+
+	vctA := registrationA.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2].Vct
+	vctB := registrationB.Issuer.CredentialConfigurationsSupported[CredentialIdentifier2].Vct
+
+	if vctA == nil || *vctA != "https://tenant-a.example.org/schema/SD_JWT_DEVELOPER_CREDENTIAL" {
+		t.Fatalf("unexpected tenant A vct: %v", vctA)
+	}
+	if vctB == nil || *vctB != "https://tenant-b.example.org/types/SD_JWT_DEVELOPER_CREDENTIAL" {
+		t.Fatalf("unexpected tenant B vct: %v", vctB)
+	}
+}

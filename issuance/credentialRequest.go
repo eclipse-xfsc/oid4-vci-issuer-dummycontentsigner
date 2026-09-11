@@ -34,8 +34,8 @@ func createCredential(code string, payload map[string]interface{}, storage Issua
 
 	credJson["credentialSubject"] = payload
 
-	if identifier == metadata.Credential_Identifier2 {
-		credJson["format"] = "vc+sd-jwt"
+	if identifier == metadata.CredentialIdentifier2 {
+		credJson["format"] = "dc+sd-jwt"
 		credJson["type"] = []string{"VerifiableCredential", "SDJWTCredential"}
 	} else {
 		credJson["format"] = "ldp_vc"
@@ -63,7 +63,7 @@ func CredentialRequest(conf config.Config, registry *tenant.Registry, storage Is
 	client, _ := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypeRep,
-		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".request",
+		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier].Subject+".request",
 	)
 
 	for {

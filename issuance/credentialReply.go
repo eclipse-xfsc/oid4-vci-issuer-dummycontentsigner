@@ -5,9 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -17,10 +19,11 @@ import (
 	"github.com/eclipse-xfsc/nats-message-library/common"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/config"
 	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/metadata"
+	"github.com/eclipse-xfsc/oid4-vci-issuer-dummycontentsigner/tenant"
 	issuance "github.com/eclipse-xfsc/oid4-vci-issuer-service/pkg/messaging"
 )
 
-func signCredential(credential map[string]interface{}, tenantId, groupid, namespace, signerkey, url, origin, nonce, format, group string) (any, error) {
+func signCredential(credential map[string]interface{}, tenantId, groupid, namespace, signerkey, url, origin, statusurl, nonce, format, group string) (any, error) {
 
 	env := os.Getenv("DUMMYCONTENTSIGNER_STATUS")
 	var err error
@@ -40,6 +43,12 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 	credential["status"] = status
 	credential["nonce"] = nonce
 
+	if format == "ldp_vc" {
+		credential["statuslisttype"] = "BitstringStatusList"
+	} else {
+		credential["statuslisttype"] = "application/statuslist+jwt"
+	}
+
 	body, err := json.Marshal(credential)
 	if err != nil {
 		return nil, err
@@ -47,7 +56,7 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 
 	r, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	r.Header.Add("Content-Type", "application/json")
-	r.Header.Add("x-origin", origin)
+	r.Header.Add("x-origin", statusurl)
 	r.Header.Add("x-tenantid", tenantId)
 	r.Header.Add("x-groupid", groupid)
 
@@ -88,12 +97,25 @@ func signCredential(credential map[string]interface{}, tenantId, groupid, namesp
 	return strings.Trim(strings.Replace(string(b), "\"", "", -1), "\n"), nil
 }
 
-func CredentialReply(conf config.Config, storage IssuanceStorage) {
+func originToDIDWeb(origin string) (string, error) {
+
+	u, err := url.Parse(origin)
+	if err != nil {
+		return "", err
+	}
+	if u.Hostname() == "" {
+		return "", fmt.Errorf("invalid origin: %s", origin)
+	}
+	return "did:web:" + u.Hostname(), nil
+
+}
+
+func CredentialReply(conf config.Config, storage IssuanceStorage, registry *tenant.Registry) {
 
 	client, err := cloudeventprovider.New(
 		cloudeventprovider.Config{Protocol: cloudeventprovider.ProtocolTypeNats, Settings: conf.Nats},
 		cloudeventprovider.ConnectionTypeRep,
-		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.Credential_Identifier].Subject+".issue",
+		metadata.BaseRegistration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier].Subject+".issue",
 	)
 	if err != nil {
 		panic(err)
@@ -129,7 +151,7 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 				}
 			}
 
-			cred["issuer"] = req.Origin
+			cred["issuer"], err = originToDIDWeb(req.Origin)
 
 			if req.Format == "" {
 				reply.Format = cred["format"].(string)
@@ -147,8 +169,40 @@ func CredentialReply(conf config.Config, storage IssuanceStorage) {
 				if req.Holder != "" {
 					cred["holder"] = req.Holder
 				}
+				t, ok := registry.Get(req.TenantId)
+				statusurl := req.Origin
 
-				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, req.Code, reply.Format, req.Group)
+				if ok {
+					if t.StatusEndpoint != nil && *t.StatusEndpoint != "" {
+						statusurl = *t.StatusEndpoint
+					}
+
+					if reply.Format == "dc+sd-jwt" {
+
+						registration := metadata.BuildRegistration(t)
+						configuration :=
+							registration.Issuer.CredentialConfigurationsSupported[metadata.CredentialIdentifier2]
+						if configuration.Vct != nil &&
+							strings.TrimSpace(*configuration.Vct) != "" {
+							vct := *configuration.Vct
+							// Actual SD-JWT payload used by the signer
+							if payload, ok := cred["credentialSubject"].(map[string]interface{}); ok {
+								payload["vct"] = vct
+							}
+						}
+
+					}
+				}
+
+				log.Printf(
+
+					"credential before signing: format=%s vct=%v credential=%+v",
+					reply.Format,
+					cred["vct"],
+					cred,
+				)
+
+				c, err := signCredential(cred, req.TenantId, req.GroupId, req.Namespace, req.SignerKey, conf.SignerCredentialUrl, req.Origin, statusurl, req.Code, reply.Format, req.Group)
 
 				if err != nil {
 					return nil, err
