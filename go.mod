@@ -6,20 +6,20 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.16.2
 	github.com/eclipse-xfsc/cloud-event-provider v0.1.5
 	github.com/eclipse-xfsc/nats-message-library v1.5.0
-	github.com/eclipse-xfsc/oid4-vci-issuer-service v1.9.1
+	github.com/eclipse-xfsc/oid4-vci-issuer-service v1.9.2
 	github.com/eclipse-xfsc/oid4-vci-vp-library v1.8.1
 	github.com/google/uuid v1.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
 )
 
 require (
-	github.com/Azure/go-amqp v1.7.0 // indirect
+	github.com/Azure/go-amqp v0.17.0 // indirect
 	github.com/IBM/sarama v1.60.2 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.15.4 // indirect
 	github.com/bytedance/sonic/loader v0.5.2 // indirect
-	github.com/cloudevents/sdk-go/protocol/amqp/v2 v2.16.2 // indirect
+	github.com/cloudevents/sdk-go/protocol/amqp/v2 v2.15.2 // indirect
 	github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2 v2.16.2 // indirect
 	github.com/cloudevents/sdk-go/protocol/mqtt_paho/v2 v2.0.0-20260907034638-0d89252a1fa0 // indirect
 	github.com/cloudevents/sdk-go/protocol/nats/v2 v2.16.2 // indirect
@@ -35,7 +35,7 @@ require (
 	github.com/eclipse-xfsc/did-core v1.0.2 // indirect
 	github.com/eclipse-xfsc/did-core/v2 v2.1.0 // indirect
 	github.com/eclipse-xfsc/microservice-core-go v1.1.2 // indirect
-	github.com/eclipse-xfsc/oid4-vci-authorization-bridge/v2 v2.5.6 // indirect
+	github.com/eclipse-xfsc/oid4-vci-authorization-bridge/v2 v2.5.7 // indirect
 	github.com/eclipse-xfsc/ssi-jwt v1.2.1 // indirect
 	github.com/eclipse-xfsc/ssi-jwt/v2 v2.3.1 // indirect
 	github.com/eclipse/paho.golang v0.23.0 // indirect
